@@ -1,0 +1,590 @@
+<!doctype html><html lang="es"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><meta name="theme-color" content="#2740D8"><meta name="apple-mobile-web-app-capable" content="yes"><meta name="mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-title" content="Plan Hyrox"><meta name="apple-mobile-web-app-status-bar-style" content="default"><link rel="manifest" href="manifest.webmanifest"><link rel="apple-touch-icon" href="apple-touch-icon.png"><link rel="icon" href="icon-192.png"><title>Plan Hyrox</title><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Big+Shoulders+Display:wght@700;800&family=Hanken+Grotesk:wght@400;500;600;700&display=swap"><style>:root{color-scheme:light}body{margin:0}[hidden]{display:none!important}img{max-width:100%}</style><style>
+/* Concepto: hoja de programación de gimnasio en una sola columna para el móvil.
+   Tres pestañas fijas abajo (Entreno, Calendario, Rutina). Lo único atrevido es el
+   rótulo condensado de cada sesión; el resto es sobrio. El amarillo solo marca Hyrox. */
+:root{
+  --bg:#EDF0F3; --surface:#FFFFFF; --surface2:#E3E8ED; --fg:#11161C; --muted:#586471; --line:#D2D9E0;
+  --accent:#2740D8; --accent-fg:#FFFFFF; --hx:#F5B800; --hx-fg:#1B1500; --ok:#1B8A57; --warn:#A8460B;
+  --display:'Big Shoulders Display','Arial Narrow',Impact,sans-serif;
+  --body:'Hanken Grotesk',system-ui,-apple-system,'Segoe UI',Roboto,sans-serif;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --bg:#0E1318; --surface:#161D24; --surface2:#1F2830; --fg:#EAEFF4; --muted:#93A0AD; --line:#2B3640;
+    --accent:#8A9CFF; --accent-fg:#0B1030; --ok:#4CC38A; --warn:#F0A267; color-scheme:dark;
+  }
+}
+:root[data-theme="dark"]{
+  --bg:#0E1318; --surface:#161D24; --surface2:#1F2830; --fg:#EAEFF4; --muted:#93A0AD; --line:#2B3640;
+  --accent:#8A9CFF; --accent-fg:#0B1030; --ok:#4CC38A; --warn:#F0A267; color-scheme:dark;
+}
+*{box-sizing:border-box}
+body{
+  background:var(--bg); color:var(--fg); font:16px/1.45 var(--body); -webkit-text-size-adjust:100%;
+  padding-block:12px calc(92px + env(safe-area-inset-bottom,0px));
+  padding-left:max(16px,env(safe-area-inset-left,0px)); padding-right:max(16px,env(safe-area-inset-right,0px));
+}
+.app{max-width:560px;margin-inline:auto;display:flex;flex-direction:column;gap:12px}
+h1,h2,h3,p{margin:0}
+h1{font:800 46px/.95 var(--display);text-transform:uppercase;letter-spacing:.01em;text-wrap:balance}
+h2{font:700 24px/1 var(--display);text-transform:uppercase;letter-spacing:.02em}
+.eyebrow{font-size:12px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--muted)}
+.muted{color:var(--muted)}
+.small{font-size:13px}
+button,input,select,textarea{font:inherit;color:inherit}
+button{cursor:pointer}
+:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+
+.card{background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:14px;display:flex;flex-direction:column;gap:10px;min-width:0}
+.row{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+.spread{display:flex;justify-content:space-between;align-items:center;gap:8px}
+
+.top{display:flex;justify-content:space-between;gap:8px;align-items:center;min-height:20px}
+.chip{font-size:12px;font-weight:600;color:var(--muted)}
+.datenav{display:grid;grid-template-columns:48px 1fr 48px;gap:8px;align-items:center}
+.nav{height:48px;border:1px solid var(--line);background:var(--surface);border-radius:10px;font-size:22px;line-height:1}
+.datebox{text-align:center;min-width:0}
+.datebox .d{font-weight:600}
+.link{background:none;border:0;padding:8px 0;color:var(--accent);font-weight:600;text-decoration:underline;text-underline-offset:3px}
+.sess{display:flex;flex-direction:column;gap:6px}
+details.swap{font-size:14px}
+details.swap summary{cursor:pointer;color:var(--accent);font-weight:600;padding:6px 0}
+select,.in,textarea{width:100%;border:1px solid var(--line);border-radius:8px;background:var(--bg);padding:10px;min-height:44px}
+textarea{min-height:76px;resize:vertical}
+select{background:var(--surface2)}
+
+.blockhead{display:flex;flex-direction:column;gap:2px;margin-top:6px}
+.blockhead h3{font:700 20px/1.05 var(--display);text-transform:uppercase;letter-spacing:.03em;color:var(--accent)}
+.ex .name{font-weight:700;font-size:17px;line-height:1.25}
+.meta{font-size:13px;color:var(--muted)}
+.pills{display:flex;gap:6px;flex-wrap:wrap;align-items:center}
+.pill{display:inline-block;font-size:11px;font-weight:800;letter-spacing:.06em;text-transform:uppercase;border-radius:6px;padding:3px 7px;background:var(--hx);color:var(--hx-fg)}
+.pill.up{background:var(--accent);color:var(--accent-fg)}
+.note{font-size:13px;color:var(--muted)}
+.last{font-size:13px}
+.last b{font-weight:600}
+.sets{display:grid;grid-template-columns:52px minmax(0,1fr) minmax(0,1fr);gap:6px 8px;align-items:center}
+.sets .lbl{font-size:12px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.06em}
+.sets .n{font-weight:700;color:var(--muted);font-variant-numeric:tabular-nums}
+.in{text-align:center;font-variant-numeric:tabular-nums}
+.in::placeholder{color:var(--muted);opacity:.55}
+
+.btn{min-height:48px;border-radius:10px;border:1px solid var(--line);background:var(--surface);font-weight:700;padding:10px 14px}
+.btn.primary{background:var(--accent);border-color:var(--accent);color:var(--accent-fg)}
+.btn[aria-pressed="true"]{background:var(--ok);border-color:var(--ok);color:#fff}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]) .btn[aria-pressed="true"]{color:#06150E}}
+:root[data-theme="dark"] .btn[aria-pressed="true"]{color:#06150E}
+.chk{display:flex;gap:10px;align-items:center;min-height:44px;font-weight:600}
+.chk input{width:22px;height:22px;accent-color:var(--accent)}
+.runfields{display:grid;grid-template-columns:90px minmax(0,1fr);gap:8px}
+.runfields label{font-size:12px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.06em;display:block;margin-bottom:4px}
+
+.calhead{display:grid;grid-template-columns:48px 1fr 48px;gap:8px;align-items:center;text-align:center}
+.calhead h2{font-size:28px}
+.cal{display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:4px}
+.dow{font-size:11px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--muted);text-align:center;padding:4px 0}
+.cell{min-width:0;min-height:62px;border:1px solid var(--line);background:var(--surface);border-radius:8px;padding:5px 2px;display:flex;flex-direction:column;align-items:center;gap:2px}
+.cell.empty{border:0;background:none}
+.cell .num{font-weight:700;font-variant-numeric:tabular-nums;font-size:15px}
+.cell .ab{font-size:10px;font-weight:700;letter-spacing:.04em;text-transform:uppercase;color:var(--muted)}
+.cell.today{border:2px solid var(--accent)}
+.mk{display:flex;gap:4px;align-items:center;height:12px}
+.dot{width:10px;height:10px;border-radius:50%}
+.dot.done{background:var(--accent)}
+.dot.part{border:2px solid var(--accent)}
+.sq{width:9px;height:9px;border-radius:2px;background:var(--hx)}
+.legend{display:flex;gap:14px;flex-wrap:wrap;font-size:13px;color:var(--muted);align-items:center}
+.legend span{display:inline-flex;gap:6px;align-items:center}
+.legend i{display:inline-block;flex:none}
+
+details.day{background:var(--surface);border:1px solid var(--line);border-radius:10px}
+details.day summary{list-style:none;cursor:pointer;padding:14px;display:flex;justify-content:space-between;gap:10px;align-items:center;min-height:56px}
+details.day summary::-webkit-details-marker{display:none}
+details.day .body{padding:0 14px 14px;display:flex;flex-direction:column;gap:8px}
+.dname{font:800 26px/1 var(--display);text-transform:uppercase}
+.dw{font-size:12px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--muted)}
+ul.l{margin:0;padding:0;list-style:none;display:flex;flex-direction:column;gap:8px}
+ul.l li{display:flex;flex-direction:column;gap:2px}
+dl.loads{margin:0;display:grid;grid-template-columns:minmax(0,1fr) auto;gap:6px 12px}
+dl.loads dt{font-weight:600}
+dl.loads dd{margin:0;text-align:right;font-variant-numeric:tabular-nums}
+.src a{color:var(--accent)}
+.src li{font-size:14px}
+
+.tabbar{position:fixed;left:0;right:0;bottom:0;z-index:20;background:var(--surface);border-top:1px solid var(--line);
+  padding:6px max(16px,env(safe-area-inset-right,0px)) calc(6px + env(safe-area-inset-bottom,0px)) max(16px,env(safe-area-inset-left,0px))}
+.tabs{max-width:560px;margin-inline:auto;display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:6px}
+.tab{display:flex;flex-direction:column;align-items:center;gap:2px;min-height:50px;padding:6px 4px;border-radius:8px;color:var(--muted);text-decoration:none;font-size:12px;font-weight:700}
+.tab[aria-current="page"]{color:var(--accent);background:var(--surface2)}
+@media (prefers-reduced-motion: reduce){*{transition:none!important;animation:none!important}}
+</style></head><body>
+
+<div class="app" id="root"></div>
+<nav class="tabbar" aria-label="Secciones">
+  <div class="tabs">
+    <a class="tab" id="tab-entreno" href="#entreno"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M6 7v10M18 7v10M3 10v4M21 10v4M6 12h12"/></svg>Entreno</a>
+    <a class="tab" id="tab-calendario" href="#calendario"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><rect x="4" y="5" width="16" height="15" rx="2"/><path d="M4 10h16M9 3v4M15 3v4"/></svg>Calendario</a>
+    <a class="tab" id="tab-rutina" href="#rutina"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M9 7h11M9 12h11M9 17h11M4.5 7h.01M4.5 12h.01M4.5 17h.01"/></svg>Rutina</a>
+  </div>
+</nav>
+
+<script>
+(function(){
+'use strict';
+
+/* ---------- Rutina ---------- */
+var FL=[{l:'kg',m:'decimal'},{l:'reps',m:'numeric'}];
+var FC=[{l:'kg',m:'decimal'},{l:'m',m:'numeric'}];
+var FT=[{l:'tiempo',m:'text',ph:'mm:ss'},{l:'nota',m:'text'}];
+var REST={comp:'descanso 2-3 min',iso:'descanso 1,5-2 min'};
+var RIR={comp:'1-2 RIR',iso:'0-1 RIR'};
+function X(id,name,sets,reps,cat,o){return Object.assign({t:'ex',id:id,name:name,sets:sets,reps:reps,cat:cat,f:FL,prog:true,setLabel:'Serie'},o||{});}
+function H(text,sub){return {t:'head',text:text,sub:sub||''};}
+function T(text){return {t:'text',text:text};}
+
+var DAYS={
+ legs:{name:'Legs',focus:'Cuádriceps, femorales y gemelo',items:[
+  X('legs-hack','Hack squat o prensa',4,'6-10','comp',{hx:'Sled push'}),
+  X('legs-bulg','Sentadilla búlgara con mancuernas',3,'8-12','comp',{per:'por pierna',hx:'Sandbag lunges'}),
+  X('legs-curl','Curl femoral sentado',3,'8-12','iso',{note:'El curl sentado estira más los femorales que el tumbado y dio más hipertrofia en el estudio de Maeo (2021).'}),
+  X('legs-ext','Extensión de cuádriceps',3,'10-15','iso',{note:'En la última serie, añade parciales en la zona alargada.'}),
+  X('legs-calf','Gemelo de pie con estiramiento completo',4,'8-12','iso',{hx:'Sled push'})
+ ]},
+ push:{name:'Push',focus:'Pecho, hombro y tríceps',items:[
+  X('push-incl','Press inclinado con mancuernas o barra',4,'6-10','comp'),
+  X('push-chest','Press de pecho en máquina o con mancuernas',3,'8-12','comp'),
+  X('push-fly','Aperturas en polea',3,'10-15','iso',{note:'Controla la bajada y busca el estiramiento.'}),
+  X('push-ohp','Press de hombro sentado',3,'8-12','comp',{hx:'Wall balls'}),
+  X('push-lat','Elevaciones laterales en polea',4,'12-20','iso'),
+  X('push-tri','Extensión overhead de tríceps en polea',3,'10-15','iso',{note:'Con el brazo sobre la cabeza la cabeza larga crece más que con el pushdown (Maeo, 2022).'})
+ ]},
+ hyrox:{name:'Hyrox',focus:'Cargas de carrera de dobles Open masculino, sin carrera',items:[
+  H('Calentamiento','8 min'),
+  T('3 min de remo y SkiErg suaves, movilidad de cadera, 2 pasadas de sled ligero y wall balls ligeros.'),
+  H('Bloque A: fuerza a carga de carrera','~18 min'),
+  X('hx-push','Sled push',5,'25 m','x',{f:FC,prog:false,setLabel:'Serie',meta:'5 × 25 m · 152 kg con el trineo · descanso 90-120 s'}),
+  X('hx-pull','Sled pull',4,'25 m','x',{f:FC,prog:false,meta:'4 × 25 m · 103 kg con el trineo · descanso 90-120 s'}),
+  H('Bloque B: sobrecarga','~10 min'),
+  X('hx-farmer','Farmer carry',4,'50 m','x',{f:FC,prog:false,meta:'4 × 50 m · 2 × 32 kg (en carrera, 2 × 24)'}),
+  X('hx-lunge','Zancadas con sandbag',3,'25 m','x',{f:FC,prog:false,meta:'3 × 25 m · 30 kg (en carrera, 20)'}),
+  H('Bloque C: simulación de dobles','2 rondas, ~22 min'),
+  T('Mitad de volumen por estación y 3 min de descanso entre rondas. Anota el tiempo de cada estación.'),
+  X('hx-ski','SkiErg 500 m',2,'500 m','x',{f:FT,prog:false,setLabel:'Ronda',meta:'2 rondas · 500 m'}),
+  X('hx-bbj','Burpee broad jump 40 m',2,'40 m','x',{f:FT,prog:false,setLabel:'Ronda',meta:'2 rondas · 40 m'}),
+  X('hx-row','Remo 500 m',2,'500 m','x',{f:FT,prog:false,setLabel:'Ronda',meta:'2 rondas · 500 m'}),
+  X('hx-wb','Wall balls con 6 kg a 10 ft',2,'50','x',{f:[{l:'reps',m:'numeric'},{l:'tiempo',m:'text',ph:'mm:ss'}],prog:false,setLabel:'Ronda',meta:'2 rondas · 50 reps · 6 kg a 10 ft'}),
+  H('Vuelta a la calma','5 min'),
+  T('Caminar, movilidad de cadera y de espalda.')
+ ]},
+ pull:{name:'Pull',focus:'Espalda, deltoide posterior, bíceps y agarre',items:[
+  X('pull-lat','Dominadas lastradas o jalón al pecho',4,'6-10','comp'),
+  X('pull-row','Remo con pecho apoyado',3,'8-12','comp',{hx:'Sled pull y remo'}),
+  X('pull-sa','Pullover recto en polea',3,'12-15','iso',{hx:'SkiErg'}),
+  X('pull-rear','Deltoide posterior en polea o máquina',3,'12-20','iso'),
+  X('pull-curl','Curl inclinado con mancuernas',3,'10-12','iso'),
+  X('pull-ham','Curl martillo',2,'10-12','iso'),
+  X('pull-hang','Dead hang',3,'máx','x',{f:[{l:'seg',m:'numeric'},{l:'nota',m:'text'}],prog:false,hx:'Agarre',meta:'3 series al máximo · descanso 90 s'})
+ ]},
+ lower:{name:'Lower',focus:'Cadena posterior, glúteo y gemelo sentado',items:[
+  X('low-rdl','Peso muerto rumano',4,'6-10','comp',{hx:'Sled pull y remo'}),
+  X('low-hip','Hip thrust',3,'8-12','comp'),
+  X('low-front','Sentadilla frontal o goblet',3,'8-10','comp',{hx:'Wall balls'}),
+  X('low-step','Step-ups con mancuernas',3,'8-10','comp',{per:'por pierna',hx:'Lunges'}),
+  X('low-curl','Curl femoral sentado',3,'10-12','iso'),
+  X('low-calf','Gemelo sentado',3,'10-15','iso'),
+  X('low-core','Elevaciones de piernas colgado',3,'10-15','iso')
+ ]},
+ upper:{name:'Upper',focus:'Tren superior completo',items:[
+  X('up-bench','Press banca',3,'6-8','comp'),
+  X('up-pull','Jalón neutro',3,'8-10','comp'),
+  X('up-ohp','Press militar',3,'6-10','comp',{hx:'Wall balls'}),
+  X('up-row','Remo en polea',3,'10-12','comp'),
+  X('up-lat','Elevaciones laterales',3,'15','iso'),
+  X('up-curl','Curl en polea (superserie A)',3,'10-12','iso'),
+  X('up-tri','Extensión overhead (superserie B)',3,'10-12','iso',{note:'Alterna A y B sin descansar entre ellos.'}),
+  X('up-carry','Suitcase carry',3,'30 m','x',{f:FC,prog:false,per:'por lado',hx:'Core lateral y agarre',meta:'3 × 30 m por lado · descanso 90 s'})
+ ]},
+ rest:{name:'Descanso',focus:'Sin gym ni carrera',items:[T('Día de descanso. Camina, haz movilidad y cuida el sueño.')]}
+};
+var WEEK=['rest','legs','push','hyrox','pull','lower','upper']; /* getDay(): 0 = domingo */
+var ORDER=[1,2,3,4,5,6,0];
+var RUNPLAN=[
+ 'Descanso.',
+ 'Sin carrera fuerte. Hoy toca pierna pesada.',
+ 'Rodaje fácil opcional, separado al menos 6 h del gym.',
+ 'Sin carrera. El Hyrox ya es la sesión de hoy.',
+ 'Calidad (series o tempo), separada al menos 6 h del Pull.',
+ 'Sin carrera fuerte.',
+ 'Rodaje largo, separado al menos 6 h del Upper.'
+];
+var ABBR={legs:'Legs',push:'Push',hyrox:'Hyrox',pull:'Pull',lower:'Lower',upper:'Upper',rest:''};
+var WD=['domingo','lunes','martes','miércoles','jueves','viernes','sábado'];
+var MONTHS=['enero','febrero','marzo','abril','mayo','junio','julio','agosto','septiembre','octubre','noviembre','diciembre'];
+
+function meta(e){
+  if(e.meta) return e.meta;
+  var p=[e.sets+' × '+e.reps+(e.per?' '+e.per:'')];
+  if(REST[e.cat]) p.push(REST[e.cat]);
+  if(RIR[e.cat]) p.push(RIR[e.cat]);
+  return p.join(' · ');
+}
+function totalSets(day){return DAYS[day].items.reduce(function(a,i){return a+(i.t==='ex'?i.sets:0);},0);}
+
+/* ---------- Utilidades ---------- */
+function esc(s){return String(s==null?'':s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');}
+function pad(n){return n<10?'0'+n:''+n;}
+function iso(d){return d.getFullYear()+'-'+pad(d.getMonth()+1)+'-'+pad(d.getDate());}
+function parseISO(s){var p=s.split('-').map(Number);return new Date(p[0],p[1]-1,p[2]);}
+function cap(s){return s.charAt(0).toUpperCase()+s.slice(1);}
+function clone(o){return JSON.parse(JSON.stringify(o));}
+function dayKey(dateIso){return WEEK[parseISO(dateIso).getDay()];}
+function longDate(dateIso){var d=parseISO(dateIso);return d.getDate()+' de '+MONTHS[d.getMonth()]+' de '+d.getFullYear();}
+function topReps(r){var m=String(r).match(/(\d+)\D*$/);return m?Number(m[1]):null;}
+
+/* ---------- Estado ---------- */
+var root=document.getElementById('root');
+var S={tab:'entreno',date:iso(new Date()),calY:new Date().getFullYear(),calM:new Date().getMonth(),logs:{},draft:null,dirty:false,sync:'connecting'};
+var store={mode:null,col:null};
+var LS='plan-hyrox-log-v1';
+
+function newDraft(dateIso){return {date:dateIso,day:dayKey(dateIso),done:false,ex:{},run:{done:false,km:'',note:''},note:''};}
+function loadDraft(dateIso){
+  var l=S.logs[dateIso];
+  if(!l) return newDraft(dateIso);
+  var d=clone(l);
+  d.ex=d.ex||{}; d.run=d.run||{done:false,km:'',note:''}; d.note=d.note||''; d.day=d.day||dayKey(dateIso);
+  return d;
+}
+function hasContent(d){
+  if(d.done||d.note||(d.run&&(d.run.done||d.run.km||d.run.note))) return true;
+  var ks=Object.keys(d.ex||{});
+  for(var i=0;i<ks.length;i++){var a=d.ex[ks[i]]||[];for(var j=0;j<a.length;j++){if(a[j]&&(a[j].a||a[j].b)) return true;}}
+  return false;
+}
+
+/* ---------- Guardado ---------- */
+var saveTimer=null, writing=Promise.resolve(), inflight=false, storeReady=null;
+function setSaved(t){var el=document.getElementById('saved');if(el) el.textContent=t;}
+function touch(){S.dirty=true;setSaved('Guardando…');clearTimeout(saveTimer);saveTimer=setTimeout(flush,300);}
+function flush(){
+  clearTimeout(saveTimer);
+  if(!S.dirty||!S.draft) return writing;
+  var snap=clone(S.draft); S.dirty=false;
+  writing=writing.then(function(){return persist(snap);}).then(function(){
+    if(!S.dirty) setSaved('Guardado');
+  }).catch(function(){S.dirty=true;S.sync='nostore';syncChip();setSaved('No se ha guardado');});
+  return writing;
+}
+function lsRead(){try{return JSON.parse(localStorage.getItem(LS)||'{}')||{};}catch(e){return {};}}
+function lsWrite(m){try{var s=JSON.stringify(m);localStorage.setItem(LS,s);return localStorage.getItem(LS)===s;}catch(e){return false;}}
+function persist(d){
+  return storeReady.then(function(){
+    var has=hasContent(d), id='d-'+d.date;
+    inflight=true;
+    var p;
+    function toLocal(){var m=lsRead(); if(has) m[d.date]=d; else delete m[d.date]; if(!lsWrite(m)) throw new Error('local');}
+    if(store.mode==='db'){
+      if(has) p=store.col.doc(id).set(d);
+      else if(S.logs[d.date]) p=store.col.doc(id).delete();
+      else p=Promise.resolve();
+    } else {
+      toLocal(); p=Promise.resolve();
+    }
+    return p.then(function(){
+      if(has) S.logs[d.date]=d; else delete S.logs[d.date];
+      inflight=false;
+    },function(err){
+      inflight=false;
+      if(store.mode==='db'){
+        /* Quien abre el enlace sin permiso de escritura guarda solo en este dispositivo. */
+        store.mode='local'; S.sync='local'; syncChip();
+        S.logs=Object.assign({},S.logs,lsRead());
+        toLocal();
+        if(has) S.logs[d.date]=d; else delete S.logs[d.date];
+        return;
+      }
+      throw err;
+    });
+  });
+}
+
+/* ---------- Almacén: db con respaldo local ---------- */
+function syncChip(){
+  var el=document.getElementById('sync'); if(!el) return;
+  var t={connecting:'Conectando…',ok:'Guardado en tu cuenta',local:'Solo en este dispositivo',slow:'Sin conexión con tus datos por ahora',nostore:'Este navegador no deja guardar datos'}[S.sync];
+  el.textContent=t;
+}
+function onDocs(snap){
+  if(store.mode!=='db') return;
+  var m={}; snap.docs.forEach(function(x){var v=x.data(); if(v&&v.date) m[v.date]=v;});
+  S.logs=m;
+  if(!snap.metadata.fromCache){S.sync='ok';clearTimeout(slowT);}
+  syncChip();
+  if(S.tab==='entreno'){
+    var a=document.activeElement;
+    var busy=a&&root.contains(a)&&a.matches('input,textarea,select');
+    if(!S.dirty&&!inflight&&!busy){
+      var fresh=loadDraft(S.date);
+      if(JSON.stringify(fresh)!==JSON.stringify(S.draft)){S.draft=fresh;render();}
+    }
+  } else if(S.tab==='calendario'){render();}
+}
+var slowT=null;
+function initStore(){
+  return (async function(){
+    try{
+      if(window.claude&&window.claude.use){
+        var res=await Promise.all([window.claude.use('db'),window.claude.use('user')]);
+        var db=res[0], user=res[1];
+        var uid=user?await user.id():null;
+        if(db&&uid){
+          store.mode='db'; store.col=db.collection('data/users/'+uid);
+          slowT=setTimeout(function(){if(S.sync!=='ok'){S.sync='slow';syncChip();}},10000);
+          store.col.onSnapshot(onDocs,function(){S.sync='slow';syncChip();});
+          return;
+        }
+      }
+    }catch(e){}
+    try{if(navigator.storage&&navigator.storage.persist) navigator.storage.persist();}catch(e){}
+    store.mode='local'; S.sync=lsWrite(lsRead())?'local':'nostore'; S.logs=lsRead(); syncChip();
+    if(S.tab==='entreno'&&!S.dirty){S.draft=loadDraft(S.date);}
+    render();
+  })();
+}
+
+/* ---------- Vistas ---------- */
+function lastFor(id,before){
+  var ds=Object.keys(S.logs).filter(function(x){return x<before;}).sort().reverse();
+  for(var i=0;i<ds.length;i++){
+    var a=(S.logs[ds[i]].ex||{})[id];
+    if(a&&a.some(function(s){return s&&(s.a||s.b);})) return a;
+  }
+  return null;
+}
+function canProg(e,last){
+  if(!e.prog||!last) return false;
+  var top=topReps(e.reps); if(!top) return false;
+  var f=last.filter(function(s){return s&&s.a&&s.b;});
+  return f.length>=e.sets&&f.every(function(s){return parseFloat(String(s.b).replace(',','.'))>=top;});
+}
+function lastText(e,last){
+  var onlyA=e.f[1].m==='text';
+  return last.map(function(s){
+    if(!s) return '';
+    return onlyA?(s.a||''):[s.a,s.b].filter(Boolean).join('×');
+  }).filter(Boolean).join(' · ');
+}
+function exHTML(e,d){
+  var vals=d.ex[e.id]||[], last=lastFor(e.id,d.date), rows='';
+  rows+='<span class="lbl">'+esc(e.setLabel)+'</span><span class="lbl" style="text-align:center">'+esc(e.f[0].l)+'</span><span class="lbl" style="text-align:center">'+esc(e.f[1].l)+'</span>';
+  for(var i=0;i<e.sets;i++){
+    var v=vals[i]||{}, lv=(last&&last[i])||{};
+    var pa=lv.a||e.f[0].ph||'', pb=lv.b||e.f[1].ph||(e.f[1].m==='numeric'?e.reps:'');
+    rows+='<span class="n">'+(i+1)+'</span>'+
+      '<input class="in" type="text" id="i-'+e.id+'-'+i+'-a" data-ex="'+e.id+'" data-i="'+i+'" data-k="a" inputmode="'+e.f[0].m+'" autocomplete="off" enterkeyhint="next" value="'+esc(v.a||'')+'" placeholder="'+esc(pa)+'" aria-label="'+esc(e.name+', '+e.setLabel.toLowerCase()+' '+(i+1)+', '+e.f[0].l)+'">'+
+      '<input class="in" type="text" id="i-'+e.id+'-'+i+'-b" data-ex="'+e.id+'" data-i="'+i+'" data-k="b" inputmode="'+e.f[1].m+'" autocomplete="off" enterkeyhint="next" value="'+esc(v.b||'')+'" placeholder="'+esc(pb)+'" aria-label="'+esc(e.name+', '+e.setLabel.toLowerCase()+' '+(i+1)+', '+e.f[1].l)+'">';
+  }
+  var pills='';
+  if(e.hx) pills+='<span class="pill">Hyrox · '+esc(e.hx)+'</span>';
+  if(canProg(e,last)) pills+='<span class="pill up">Sube carga</span>';
+  return '<section class="card ex" aria-label="'+esc(e.name)+'">'+
+    '<div><div class="name">'+esc(e.name)+'</div><div class="meta">'+esc(meta(e))+'</div></div>'+
+    (pills?'<div class="pills">'+pills+'</div>':'')+
+    (e.note?'<p class="note">'+esc(e.note)+'</p>':'')+
+    (last?'<p class="last"><span class="muted">Última vez:</span> <b>'+esc(lastText(e,last))+'</b></p>':'')+
+    '<div class="sets">'+rows+'</div></section>';
+}
+function renderEntreno(){
+  var d=S.draft, day=DAYS[d.day]||DAYS.rest, dt=parseISO(d.date);
+  var todayIso=iso(new Date());
+  var h='';
+  h+='<div class="top"><span class="chip" id="sync"></span><span class="chip" id="saved"></span></div>';
+  h+='<div class="datenav"><button class="nav" data-act="prev" aria-label="Día anterior">‹</button>'+
+     '<div class="datebox"><div class="eyebrow">'+esc(cap(WD[dt.getDay()]))+'</div><div class="d">'+esc(longDate(d.date))+'</div></div>'+
+     '<button class="nav" data-act="next" aria-label="Día siguiente">›</button></div>';
+  if(d.date!==todayIso) h+='<div style="text-align:center"><button class="link" data-act="today">Ir a hoy</button></div>';
+  h+='<div class="sess"><h1>'+esc(day.name)+'</h1><p class="muted">'+esc(day.focus)+(d.day!=='rest'?' · '+(d.day==='hyrox'?'~63 min':'hasta 70 min')+(totalSets(d.day)&&d.day!=='hyrox'?' · '+totalSets(d.day)+' series':''):'')+'</p>'+
+     '<details class="swap"><summary>Cambiar la sesión de este día</summary><label class="small muted" for="sessionSel">Sesión</label><select id="sessionSel">'+
+     ORDER.map(function(i){var k=WEEK[i];return '<option value="'+k+'"'+(k===d.day?' selected':'')+'>'+esc(DAYS[k].name)+'</option>';}).join('')+
+     '</select></details></div>';
+  day.items.forEach(function(it){
+    if(it.t==='head') h+='<div class="blockhead"><h3>'+esc(it.text)+'</h3>'+(it.sub?'<span class="meta">'+esc(it.sub)+'</span>':'')+'</div>';
+    else if(it.t==='text') h+='<p class="muted">'+esc(it.text)+'</p>';
+    else h+=exHTML(it,d);
+  });
+  var dowIdx=dt.getDay();
+  h+='<section class="card"><h2>Carrera</h2><p class="muted">'+esc(RUNPLAN[dowIdx])+'</p>'+
+     '<label class="chk" for="runDone"><input type="checkbox" id="runDone" data-role="rundone"'+(d.run.done?' checked':'')+'> Carrera hecha</label>'+
+     '<div class="runfields"><div><label for="runKm">Km</label><input class="in" type="text" id="runKm" data-role="runkm" inputmode="decimal" autocomplete="off" value="'+esc(d.run.km)+'"></div>'+
+     '<div><label for="runNote">Nota</label><input class="in" type="text" id="runNote" data-role="runnote" autocomplete="off" style="text-align:left" value="'+esc(d.run.note)+'"></div></div></section>';
+  h+='<section class="card"><h2>Notas del día</h2><label class="small muted" for="dayNote">Sensaciones, cambios de ejercicio, molestias</label><textarea id="dayNote" data-role="note">'+esc(d.note)+'</textarea></section>';
+  h+='<button class="btn" id="doneBtn" data-act="done" aria-pressed="'+(d.done?'true':'false')+'">'+(d.done?'Sesión hecha':'Marcar sesión como hecha')+'</button>';
+  root.innerHTML=h; syncChip();
+}
+
+function renderCal(){
+  var y=S.calY, m=S.calM, first=new Date(y,m,1), off=(first.getDay()+6)%7, dim=new Date(y,m+1,0).getDate();
+  var todayIso=iso(new Date()), sessions=0, runs=0, h='';
+  var cells='';
+  ['L','M','X','J','V','S','D'].forEach(function(x){cells+='<div class="dow" aria-hidden="true">'+x+'</div>';});
+  for(var i=0;i<off;i++) cells+='<div class="cell empty"></div>';
+  for(var n=1;n<=dim;n++){
+    var di=y+'-'+pad(m+1)+'-'+pad(n), l=S.logs[di], key=(l&&l.day)||dayKey(di);
+    var mk='', lab=MONTHS_LABEL(n,m)+', '+(DAYS[key]?DAYS[key].name:'');
+    if(l&&l.done){mk+='<span class="dot done"></span>';sessions++;lab+=', sesión hecha';}
+    else if(l&&hasContent(l)&&hasGym(l)){mk+='<span class="dot part"></span>';lab+=', con datos';}
+    if(l&&l.run&&l.run.done){mk+='<span class="sq"></span>';runs++;lab+=', carrera hecha';}
+    cells+='<button class="cell'+(di===todayIso?' today':'')+'" data-date="'+di+'" aria-label="'+esc(lab)+'"><span class="num">'+n+'</span><span class="ab">'+esc(ABBR[key]||'')+'</span><span class="mk">'+mk+'</span></button>';
+  }
+  h+='<div class="calhead"><button class="nav" data-act="calprev" aria-label="Mes anterior">‹</button><h2>'+esc(cap(MONTHS[m]))+' '+y+'</h2><button class="nav" data-act="calnext" aria-label="Mes siguiente">›</button></div>';
+  h+='<div class="cal">'+cells+'</div>';
+  h+='<div class="legend"><span><i class="dot done"></i>Sesión hecha</span><span><i class="dot part"></i>Con datos</span><span><i class="sq"></i>Carrera</span></div>';
+  h+='<section class="card"><h2>Resumen del mes</h2><p><b>'+sessions+'</b> sesiones de gym · <b>'+runs+'</b> carreras</p><p class="muted small">Toca un día para ver o registrar su entreno.</p></section>';
+  root.innerHTML=h;
+}
+function MONTHS_LABEL(n,m){return n+' de '+MONTHS[m];}
+function hasGym(l){
+  var ks=Object.keys(l.ex||{});
+  for(var i=0;i<ks.length;i++){var a=l.ex[ks[i]]||[];for(var j=0;j<a.length;j++){if(a[j]&&(a[j].a||a[j].b)) return true;}}
+  return !!l.note;
+}
+
+function renderRutina(){
+  var h='<div><div class="eyebrow">Hipertrofia con refuerzo Hyrox</div><h1>Rutina</h1><p class="muted">Semana de 6 sesiones. Toca un día para ver sus ejercicios.</p></div>';
+  ORDER.forEach(function(i){
+    var k=WEEK[i], day=DAYS[k], body='';
+    day.items.forEach(function(it){
+      if(it.t==='head') body+='<div class="blockhead"><h3>'+esc(it.text)+'</h3>'+(it.sub?'<span class="meta">'+esc(it.sub)+'</span>':'')+'</div>';
+      else if(it.t==='text') body+='<p class="muted small">'+esc(it.text)+'</p>';
+    });
+    var list='';
+    day.items.forEach(function(it){
+      if(it.t==='ex') list+='<li><span style="font-weight:600">'+esc(it.name)+'</span><span class="meta">'+esc(meta(it))+'</span>'+(it.hx?'<span><span class="pill">Hyrox · '+esc(it.hx)+'</span></span>':'')+'</li>';
+    });
+    var inner=(k==='hyrox'||k==='rest')?'':'';
+    var bodyHTML;
+    if(k==='hyrox'){
+      bodyHTML=''; var open=false;
+      day.items.forEach(function(it){
+        if(it.t==='head') bodyHTML+='<div class="blockhead"><h3>'+esc(it.text)+'</h3>'+(it.sub?'<span class="meta">'+esc(it.sub)+'</span>':'')+'</div>';
+        else if(it.t==='text') bodyHTML+='<p class="muted small">'+esc(it.text)+'</p>';
+        else bodyHTML+='<ul class="l"><li><span style="font-weight:600">'+esc(it.name)+'</span><span class="meta">'+esc(meta(it))+'</span></li></ul>';
+      });
+    } else if(k==='rest'){
+      bodyHTML='<p class="muted small">'+esc(day.items[0].text)+'</p>';
+    } else {
+      bodyHTML='<ul class="l">'+list+'</ul>';
+    }
+    h+='<details class="day"><summary><div><div class="dw">'+esc(cap(WD[i]))+'</div><div class="dname">'+esc(day.name)+'</div></div><span class="meta" style="text-align:right">'+(k==='rest'?'':(k==='hyrox'?'~63 min':totalSets(k)+' series'))+'</span></summary><div class="body">'+bodyHTML+
+      '<div class="meta"><b>Carrera:</b> '+esc(RUNPLAN[i])+'</div></div></details>';
+  });
+  h+='<section class="card"><h2>Cargas de carrera</h2><p class="muted small">Dobles Open masculino. Las cargas no se reparten entre los dos, solo las repeticiones y los metros.</p><dl class="loads">'+
+    [['SkiErg','1000 m'],['Sled push','50 m · 152 kg'],['Sled pull','50 m · 103 kg'],['Burpee broad jump','80 m'],['Remo','1000 m'],['Farmer carry','200 m · 2 × 24 kg'],['Sandbag lunges','100 m · 20 kg'],['Wall balls','100 reps · 6 kg']]
+    .map(function(r){return '<dt>'+esc(r[0])+'</dt><dd>'+esc(r[1])+'</dd>';}).join('')+
+    '</dl><p class="small muted">Los pesos de sled incluyen el trineo. Las fuentes discrepan en la altura del wall ball (9 o 10 ft): confírmala en el reglamento 26/27. Aquí se entrena a 10 ft.</p></section>';
+  h+='<section class="card"><h2>Criterios</h2><ul class="l">'+
+    '<li><b>Volumen.</b> Apunta a 10-20 series directas por músculo a la semana. Más series dan más crecimiento, con retornos decrecientes (Pelland et al.).</li>'+
+    '<li><b>Cercanía al fallo.</b> No hace falta llegar siempre al fallo, pero sí acercarse: 1-2 repeticiones en reserva en compuestos y 0-1 en aislamientos (Refalo 2023; Robinson 2024).</li>'+
+    '<li><b>Descanso.</b> Más de 60 s da un pequeño beneficio frente a menos. Por encima de unos 90 s no se aprecia diferencia (Singer 2024). Compuestos 2-3 min, aislamientos 1,5-2 min.</li>'+
+    '<li><b>Músculo alargado.</b> Entrenar con el músculo estirado favorece la hipertrofia: curl sentado frente a tumbado (Maeo 2021) y tríceps overhead frente a pushdown (Maeo 2022). Las parciales alargadas tienen un efecto pequeño a favor (Wolf 2023).</li>'+
+    '<li><b>Carrera y fuerza.</b> Separa carrera y gym al menos 6 h (Robineau 2016). La hipertrofia no se resiente, pero la fuerza explosiva puede atenuarse, sobre todo en la misma sesión (Schumann 2022).</li>'+
+    '<li><b>Lesiones.</b> Sube cargas y volumen poco a poco: volumen y frecuencia son factores de riesgo (Brandt 2025).</li>'+
+    '<li><b>Carga.</b> Cuando completes todas las series en el tope de repeticiones, la app te avisa para subir peso.</li></ul></section>';
+  h+='<section class="card"><h2>Copia de seguridad</h2><p class="muted small">Copia tus entrenos como texto y guárdalo en Notas. Para restaurarlos, pégalo aquí y toca Restaurar.</p><label class="small muted" for="bkText">Datos</label><textarea id="bkText" autocomplete="off" spellcheck="false"></textarea><div class="row"><button class="btn" data-act="copybk">Copiar entrenos</button><button class="btn" data-act="restorebk">Restaurar</button></div><p class="small muted" id="bkMsg" role="status"></p></section>';
+  h+='<section class="card src"><h2>Fuentes</h2><ul class="l">'+
+    [['Brandt et al. 2025, Frontiers in Physiology','https://pmc.ncbi.nlm.nih.gov/articles/PMC11994925/'],
+     ['Rappelt et al. 2026, Frontiers in Physiology','https://www.ncbi.nlm.nih.gov/pmc/articles/PMC13409289/'],
+     ['Pelland et al., volumen y frecuencia (SportRxiv)','https://sportrxiv.org/index.php/server/preprint/download/460/967/908'],
+     ['Refalo et al. 2023, Sports Medicine','https://scholars.duke.edu/publication/1687483'],
+     ['Singer et al. 2024, Frontiers in Sports and Active Living','https://doaj.org/article/18363f4031e0487793db2084bee23f38'],
+     ['Maeo et al. 2021, curl femoral sentado','https://pubmed.ncbi.nlm.nih.gov/33009197/'],
+     ['Maeo et al. 2022, tríceps overhead','https://www.strongerbyscience.com/?p=57800'],
+     ['Robineau et al. 2016, entrenamiento concurrente','https://pubmed.ncbi.nlm.nih.gov/25546450/'],
+     ['Schumann et al. 2022, Sports Medicine','https://researchonline.jcu.edu.au/71546/1/Schumann2021_Article_CompatibilityOfConcurrentAerob.pdf']]
+    .map(function(r){return '<li><a href="'+r[1]+'" target="_blank" rel="noopener noreferrer">'+esc(r[0])+'</a></li>';}).join('')+'</ul></section>';
+  root.innerHTML=h;
+}
+
+function render(){
+  ['entreno','calendario','rutina'].forEach(function(t){
+    var el=document.getElementById('tab-'+t);
+    if(t===S.tab) el.setAttribute('aria-current','page'); else el.removeAttribute('aria-current');
+  });
+  if(S.tab==='entreno'){ if(!S.draft) S.draft=loadDraft(S.date); renderEntreno(); }
+  else if(S.tab==='calendario') renderCal();
+  else renderRutina();
+}
+function route(){
+  var h=(location.hash||'').replace('#','');
+  var next=(h==='calendario'||h==='rutina'||h==='entreno')?h:'entreno';
+  if(next!==S.tab){ flush(); S.tab=next; window.scrollTo(0,0); }
+  if(S.tab==='entreno'&&!S.draft) S.draft=loadDraft(S.date);
+  render();
+}
+function gotoDate(dateIso){
+  flush();
+  S.date=dateIso; S.draft=loadDraft(dateIso);
+  if(S.tab!=='entreno'){ location.hash='#entreno'; } else { render(); window.scrollTo(0,0); }
+}
+
+/* ---------- Eventos ---------- */
+root.addEventListener('input',function(e){
+  var t=e.target, d=S.draft;
+  if(!d||t.type==='checkbox') return;
+  if(t.dataset.ex){
+    var arr=(d.ex[t.dataset.ex]=d.ex[t.dataset.ex]||[]), i=Number(t.dataset.i);
+    arr[i]=arr[i]||{a:'',b:''}; arr[i][t.dataset.k]=t.value;
+    for(var j=0;j<arr.length;j++){ if(!arr[j]) arr[j]={a:'',b:''}; }
+    touch();
+  } else if(t.dataset.role==='runkm'){ d.run.km=t.value; touch(); }
+  else if(t.dataset.role==='runnote'){ d.run.note=t.value; touch(); }
+  else if(t.dataset.role==='note'){ d.note=t.value; touch(); }
+});
+root.addEventListener('change',function(e){
+  var t=e.target, d=S.draft;
+  if(t.dataset&&t.dataset.role==='rundone'&&d){ d.run.done=t.checked; touch(); flush(); }
+  else if(t.id==='sessionSel'&&d){ d.day=t.value; touch(); flush(); render(); }
+});
+root.addEventListener('click',function(e){
+  var c=e.target.closest('[data-act],[data-date]'); if(!c) return;
+  if(c.dataset.date){ gotoDate(c.dataset.date); return; }
+  var a=c.dataset.act, d;
+  if(a==='prev'||a==='next'){ d=parseISO(S.date); d.setDate(d.getDate()+(a==='next'?1:-1)); gotoDate(iso(d)); }
+  else if(a==='today'){ gotoDate(iso(new Date())); }
+  else if(a==='done'){
+    S.draft.done=!S.draft.done; touch(); flush();
+    c.setAttribute('aria-pressed',S.draft.done?'true':'false');
+    c.textContent=S.draft.done?'Sesión hecha':'Marcar sesión como hecha';
+  }
+  else if(a==='copybk'){
+    var ta=document.getElementById('bkText'), msg=document.getElementById('bkMsg'), txt=JSON.stringify(S.logs);
+    ta.value=txt; ta.focus(); ta.select();
+    var okc=function(){msg.textContent='Copiado. Pégalo en Notas para guardarlo.';};
+    var noc=function(){msg.textContent='Selecciona el texto y cópialo a mano.';};
+    try{navigator.clipboard.writeText(txt).then(okc,noc);}catch(x){noc();}
+  }
+  else if(a==='restorebk'){
+    var ta2=document.getElementById('bkText'), msg2=document.getElementById('bkMsg'), map;
+    try{map=JSON.parse(ta2.value);}catch(x){map=null;}
+    if(!map||typeof map!=='object'||Array.isArray(map)){msg2.textContent='El texto no es una copia válida.';return;}
+    var ks=Object.keys(map).filter(function(k){return /^\d{4}-\d{2}-\d{2}$/.test(k)&&map[k]&&map[k].date===k;});
+    if(!ks.length){msg2.textContent='No hay entrenos en ese texto.';return;}
+    ks.forEach(function(k){writing=writing.then(function(){return persist(map[k]);});});
+    writing.then(function(){msg2.textContent='Restaurados '+ks.length+' días.';S.draft=null;},function(){msg2.textContent='No se pudo restaurar.';});
+  }
+  else if(a==='calprev'||a==='calnext'){
+    S.calM+=(a==='calnext'?1:-1);
+    if(S.calM<0){S.calM=11;S.calY--;} if(S.calM>11){S.calM=0;S.calY++;}
+    render();
+  }
+});
+window.addEventListener('hashchange',route);
+document.addEventListener('visibilitychange',function(){if(document.visibilityState==='hidden') flush();});
+window.addEventListener('pagehide',function(){flush();});
+
+/* ---------- Arranque ---------- */
+storeReady=initStore();
+route();
+})();
+</script>
+<script>if("serviceWorker" in navigator){navigator.serviceWorker.register("sw.js").catch(function(){});}</script></body></html>
